@@ -21,23 +21,31 @@ Some prompts to answer:
 
 - What features does each `Song` use in your system
   - For example: genre, mood, energy, tempo
-  - Genre, mood tag, valence, energy, acousticness. Genre and mood exist as labels, but scoring leans on the three audio features since not every sad-sounding song is tagged "sad."
+  - Genre, mood tag, valence, energy, and acousticness. These are the core inputs to scoring: genre/mood are exact-label checks, while valence/energy/acousticness are continuous similarity features.
 
 - What information does your `UserProfile` store
-  - A target feature profile, not a list of favorite artists or genres. It stores ideal values for valence, energy, and acousticness representing the mood the user wants (low valence, low-to-moderate energy, high acousticness).
+  - A mix of labels and target audio values: preferred genre, preferred mood, and ideal values for valence, energy, and acousticness (for sad pop: low valence, low-to-moderate energy, higher acousticness).
 
 - How does your `Recommender` compute a score for each song
-  - It measures how far each song's feature values are from the target values, then combines those closeness scores with weights. Valence counts most (clearest signal of sadness), energy counts somewhat less, acousticness counts least. A song only scores high by being close on the features that matter most, not just by having one extreme value.
+  - **Finalized Algorithm Recipe:**  
+    `genre_match = 1 if song.genre == user.genre else 0`  
+    `mood_match = 1 if song.mood == user.mood else 0`  
+    `energy_sim = max(0, 1 - abs(song.energy - user.energy))`  
+    `valence_sim = max(0, 1 - abs(song.valence - user.valence))`  
+    `acousticness_sim = max(0, 1 - abs(song.acousticness - user.acousticness))`  
+    `score = 2.0*genre_match + 1.0*mood_match + 2.0*energy_sim + 1.5*valence_sim + 1.0*acousticness_sim`  
+    This keeps genre important, gives mood a smaller bonus, and still lets strong feature similarity outrank a weak label-only match.
 
 - How do you choose which songs to recommend
-  - Score every song first, then sort the full list from highest score to lowest. Scoring and ranking are separate steps: scoring judges one song at a time, ranking looks at the whole list and decides final order (and could add rules later, like limiting songs per artist).
+  - Score every song in the CSV, store `(song, score, explanation)`, sort from highest to lowest score, and return the top `k`. This separates per-song judgment from final ranking.
 
 - Real-world recommendations
-  - Real-world recommenders like Spotify or YouTube blend collaborative filtering (what similar users listened to) with content-based filtering (a song's own attributes), since each covers the other's blind spots. My version only implements the content-based half — it has no concept of other users, so it can't say "people who liked this also liked that." Instead, it matches a song's audio features (valence, energy, acousticness) against a fixed target mood profile. This avoids the cold-start problem but can't learn from user behavior over time.
+  - Real-world systems (Spotify/YouTube) combine collaborative filtering with content features. My version is content-based only: it compares song attributes to a fixed target profile, so it can work without user-history data but cannot learn from crowd behavior or personal listening patterns over time.
 
 - Specific features used by `Song` and `UserProfile` objects
   - **`Song` object features:** `title`, `artist`, `genre`, `mood` (label), `energy`, `tempo_bpm`, `valence`, `danceability`, `acousticness`
-  - **`UserProfile` object features:** target `valence` (ideal mood positivity/negativity), target `energy` (ideal intensity level), target `acousticness` (ideal acoustic-vs-produced texture), and a set of feature `weights` (how much each target matters relative to the others when computing a score)
+  - **`UserProfile` object features:** preferred `genre`, preferred `mood`, target `valence` (ideal mood positivity/negativity), target `energy` (ideal intensity level), and target `acousticness` (ideal acoustic-vs-produced texture)
+  - **Potential bias note:** this system may over-prioritize genre labels and miss cross-genre songs that match the mood/audio target; it can also inherit noisy mood/genre tags from the dataset.
 
 ---
 
@@ -127,6 +135,5 @@ Write 1 to 2 paragraphs here about what you learned:
 
 - about how recommenders turn data into predictions
 - about where bias or unfairness could show up in systems like this
-
 
 
