@@ -11,8 +11,6 @@ Your goal is to:
 - Evaluate what your system gets right and wrong
 - Reflect on how this mirrors real world AI recommenders
 
-Replace this paragraph with your own summary of what your version does.
-
 ---
 
 ## How The System Works
@@ -23,11 +21,23 @@ Some prompts to answer:
 
 - What features does each `Song` use in your system
   - For example: genre, mood, energy, tempo
-- What information does your `UserProfile` store
-- How does your `Recommender` compute a score for each song
-- How do you choose which songs to recommend
+  - Genre, mood tag, valence, energy, acousticness. Genre and mood exist as labels, but scoring leans on the three audio features since not every sad-sounding song is tagged "sad."
 
-You can include a simple diagram or bullet list if helpful.
+- What information does your `UserProfile` store
+  - A target feature profile, not a list of favorite artists or genres. It stores ideal values for valence, energy, and acousticness representing the mood the user wants (low valence, low-to-moderate energy, high acousticness).
+
+- How does your `Recommender` compute a score for each song
+  - It measures how far each song's feature values are from the target values, then combines those closeness scores with weights. Valence counts most (clearest signal of sadness), energy counts somewhat less, acousticness counts least. A song only scores high by being close on the features that matter most, not just by having one extreme value.
+
+- How do you choose which songs to recommend
+  - Score every song first, then sort the full list from highest score to lowest. Scoring and ranking are separate steps: scoring judges one song at a time, ranking looks at the whole list and decides final order (and could add rules later, like limiting songs per artist).
+
+- Real-world recommendations
+  - Real-world recommenders like Spotify or YouTube blend collaborative filtering (what similar users listened to) with content-based filtering (a song's own attributes), since each covers the other's blind spots. My version only implements the content-based half — it has no concept of other users, so it can't say "people who liked this also liked that." Instead, it matches a song's audio features (valence, energy, acousticness) against a fixed target mood profile. This avoids the cold-start problem but can't learn from user behavior over time.
+
+- Specific features used by `Song` and `UserProfile` objects
+  - **`Song` object features:** `title`, `artist`, `genre`, `mood` (label), `energy`, `tempo_bpm`, `valence`, `danceability`, `acousticness`
+  - **`UserProfile` object features:** target `valence` (ideal mood positivity/negativity), target `energy` (ideal intensity level), target `acousticness` (ideal acoustic-vs-produced texture), and a set of feature `weights` (how much each target matters relative to the others when computing a score)
 
 ---
 
