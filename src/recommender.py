@@ -96,9 +96,9 @@ def score_song(user_prefs: Dict, song: Dict) -> Tuple[float, List[str]]:
         # assume preference for high acousticness
         target_acoustic = 1.0
 
-    # 1) Genre exact match -> +3.0
+    # 1) Genre exact match -> +1.5 (experimental: halved genre importance)
     if user_genre and song.get("genre") and user_genre.lower() == song.get("genre").lower():
-        pts = 3.0
+        pts = 1.5
         total += pts
         reasons.append(f"genre match (+{pts:.2f})")
 
@@ -108,11 +108,11 @@ def score_song(user_prefs: Dict, song: Dict) -> Tuple[float, List[str]]:
         total += pts
         reasons.append(f"mood match (+{pts:.2f})")
 
-    # 3) Energy closeness -> up to +3.0
+    # 3) Energy closeness -> up to +6.0 (experimental: doubled energy importance)
     if target_energy is not None and song.get("energy") is not None:
         dist = abs(float(song["energy"]) - float(target_energy))
         sim = max(0.0, 1.0 - dist)  # 1.0 for exact match, 0 at distance >=1
-        pts = 3.0 * sim
+        pts = 6.0 * sim
         if pts > 0:
             total += pts
             reasons.append(f"energy closeness (+{pts:.2f})")

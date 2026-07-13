@@ -8,18 +8,22 @@ You will implement the functions in recommender.py:
 - score_song
 - recommend_songs
 """
-from .recommender import load_songs, recommend_songs
+from typing import Dict, List, Tuple
 
-def main() -> None:
-    songs = load_songs("data/songs.csv")
+try:
+    from .recommender import load_songs, recommend_songs
+except ImportError:
+    from recommender import load_songs, recommend_songs
 
-    # Default profile (pop / happy) — verifies the recommender against
-    # an obvious, easy-to-check case
-    user_prefs = {"genre": "pop", "mood": "happy", "energy": 0.8}
 
-    recommendations = recommend_songs(user_prefs, songs, k=5)
-
-    print("\nTop Recommendations")
+def print_profile_recommendations(
+    profile_name: str,
+    user_prefs: Dict,
+    recommendations: List[Tuple[Dict, float, List[str]]],
+) -> None:
+    """Print top recommendations for one named user profile."""
+    print(f"\nProfile: {profile_name}")
+    print(f"Preferences: {user_prefs}")
     print("=" * 72)
 
     for rank, (song, score, reasons) in enumerate(recommendations, start=1):
@@ -30,6 +34,29 @@ def main() -> None:
             print(f"   - {reason}")
 
     print("\n" + "=" * 72)
+
+
+def main() -> None:
+    songs = load_songs("data/songs.csv")
+
+    profiles = {
+        "High-Energy Pop": {"genre": "pop", "mood": "happy", "energy": 0.9},
+        "Chill Lofi": {"genre": "lofi", "mood": "chill", "energy": 0.35},
+        "Deep Intense Rock": {"genre": "rock", "mood": "intense", "energy": 0.95},
+        # Adversarial profile: conflicting mood and very high energy
+        "Adversarial: Sad but Max Energy": {"genre": "pop", "mood": "sad", "energy": 0.9},
+        # Adversarial profile: acoustic preference fights high-energy dance genres
+        "Adversarial: Hyped but Highly Acoustic": {
+            "genre": "techno",
+            "mood": "euphoric",
+            "energy": 0.95,
+            "likes_acoustic": True,
+        },
+    }
+
+    for profile_name, user_prefs in profiles.items():
+        recommendations = recommend_songs(user_prefs, songs, k=5)
+        print_profile_recommendations(profile_name, user_prefs, recommendations)
 
 
 if __name__ == "__main__":
