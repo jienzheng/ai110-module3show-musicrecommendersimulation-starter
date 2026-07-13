@@ -86,15 +86,42 @@ You can add more tests in `tests/test_recommender.py`.
 
 ## Sample Recommendation Output
 
-Paste a sample of your recommender's output here as a text block so a reader can see what it produces:
+```text
+Loaded songs: 28
 
-```
-# e.g.:
-# User profile: genre=indie, mood=chill, energy=low
-# Recommendations:
-#   1. ...
-#   2. ...
-#   3. ...
+Top Recommendations
+========================================================================
+
+1. Sunrise City
+   Final Score: 7.94
+   Reasons:
+   - genre match (+3.00)
+   - mood match (+2.00)
+   - energy closeness (+2.94)
+
+2. Gym Hero
+   Final Score: 5.61
+   Reasons:
+   - genre match (+3.00)
+   - energy closeness (+2.61)
+
+3. Rooftop Lights
+   Final Score: 4.88
+   Reasons:
+   - mood match (+2.00)
+   - energy closeness (+2.88)
+
+4. Lagos Sunrise
+   Final Score: 2.97
+   Reasons:
+   - energy closeness (+2.97)
+
+5. Aurora Lift
+   Final Score: 2.91
+   Reasons:
+   - energy closeness (+2.91)
+
+========================================================================
 ```
 
 **Screenshot or video** *(optional)*: <!-- Insert a screenshot or demo video link here -->
@@ -135,5 +162,3 @@ Write 1 to 2 paragraphs here about what you learned:
 
 - about how recommenders turn data into predictions
 - about where bias or unfairness could show up in systems like this
-
-
